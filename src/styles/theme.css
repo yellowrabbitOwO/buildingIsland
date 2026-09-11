@@ -1,0 +1,291 @@
+:root {
+  --font-serif: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --font-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", -apple-system,
+    sans-serif;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+html[data-theme="dark"] {
+  --bg: #1a1a1c;
+  --bg-elevated: #232326;
+  --bg-hover: #2c2c30;
+  --bg-input: #1f1f22;
+  --border: #35353a;
+  --text: #e8e6e1;
+  --text-muted: #9a9a9f;
+  --text-faint: #5f5f66;
+  --accent: #c9a463;
+  --accent-contrast: #1a1a1c;
+  --danger: #d16565;
+}
+
+html[data-theme="light"] {
+  --bg: #faf9f6;
+  --bg-elevated: #ffffff;
+  --bg-hover: #f0efea;
+  --bg-input: #ffffff;
+  --border: #e2e0d8;
+  --text: #2a2a28;
+  --text-muted: #6b6a64;
+  --text-faint: #a6a49b;
+  --accent: #a97e3b;
+  --accent-contrast: #ffffff;
+  --danger: #b8453f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: inherit;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 6px 8px;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 1px solid var(--accent);
+}
+
+.btn {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 6px 14px;
+}
+
+.btn:hover {
+  background: var(--bg-hover);
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-danger {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.btn-ghost {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+}
+
+.btn-ghost:hover {
+  color: var(--text);
+}
+
+.card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.tag-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.builtin-badge {
+  font-size: 11px;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 1px 6px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 5px;
+}
+
+/* 一般寫作模式的 TipTap 富文本內容：全域 h1-h4/margin:0 對長文閱讀太擠，這裡另外給區塊間距、
+   清單縮排、引用/分隔線樣式，以及套件本身不附樣式的表格與圖片 */
+.richtext-editor .ProseMirror {
+  outline: none;
+}
+
+.richtext-editor h1,
+.richtext-editor h2,
+.richtext-editor h3 {
+  margin: 18px 0 8px;
+}
+
+.richtext-editor p {
+  margin: 0 0 10px;
+}
+
+.richtext-editor ul,
+.richtext-editor ol {
+  padding-left: 24px;
+  margin: 0 0 10px;
+}
+
+.richtext-editor blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 12px;
+  margin: 8px 0;
+  color: var(--text-muted);
+}
+
+.richtext-editor hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 16px 0;
+}
+
+.richtext-editor img {
+  max-width: 100%;
+  border-radius: var(--radius-sm);
+}
+
+.richtext-editor mark {
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.richtext-editor table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 8px 0;
+}
+
+.richtext-editor th,
+.richtext-editor td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  vertical-align: top;
+}
+
+.richtext-editor th {
+  background: var(--bg-hover);
+  font-weight: 600;
+  text-align: left;
+}
+
+.richtext-editor .selectedCell {
+  background: var(--bg-hover);
+}
+
+.richtext-editor .column-resize-handle {
+  background: var(--accent);
+}
+
+/* 劇本模式編輯器：每個 scriptLine 節點依 data-line-type 套用業界標準劇本排版樣式，
+   等寬字型（Courier）是劇本業界慣例；文字大小寫轉換純視覺呈現，不動實際存的內容 */
+.script-editor .ProseMirror {
+  font-family: "Courier Prime", "Courier New", Courier, monospace;
+  outline: none;
+}
+
+.script-editor .script-line {
+  margin: 0 0 8px;
+}
+
+.script-editor .script-line[data-line-type="sceneHeading"] {
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 18px 0 4px;
+}
+
+.script-editor .script-line[data-line-type="character"] {
+  text-transform: uppercase;
+  margin-left: 35%;
+  margin-top: 14px;
+  margin-bottom: 0;
+}
+
+.script-editor .script-line[data-line-type="parenthetical"] {
+  margin-left: 28%;
+  max-width: 45%;
+  font-style: italic;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.script-editor .script-line[data-line-type="dialogue"] {
+  margin-left: 20%;
+  max-width: 60%;
+  margin-top: 0;
+}
+
+.script-editor .script-line[data-line-type="transition"] {
+  text-transform: uppercase;
+  text-align: right;
+}
+
+.script-editor .script-line[data-line-type="centered"] {
+  text-align: center;
+}
+
+/* 側邊面板僅在較寬的視窗顯示；窄螢幕（含手機）隱藏面板本身、拖拉分隔線與所有「在旁邊開啟」按鈕 */
+@media (max-width: 900px) {
+  .side-panel,
+  .panel-divider,
+  .panel-trigger {
+    display: none;
+  }
+}
