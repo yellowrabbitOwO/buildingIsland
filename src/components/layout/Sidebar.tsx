@@ -5,6 +5,7 @@ import { db } from "../../data/db";
 import { createCategory } from "../../data/repositories/category";
 import { useSidePanel } from "../common/SidePanelProvider";
 import { useLanguage, categoryDisplayName } from "../../i18n";
+import { isReadOnlyDemo } from "../../demoMode";
 
 interface SidebarProps {
   worldId: string;
@@ -110,22 +111,31 @@ export default function Sidebar({ worldId, worldName }: SidebarProps) {
     setAddingCategory(false);
   };
 
-  const navItems: NavItem[] = [
-    { to: `/world/${worldId}/search`, label: t("sidebar.nav.search"), icon: "🔍" },
-    { to: `/world/${worldId}`, label: t("sidebar.nav.worldHome"), icon: "🏠", end: true },
-    { to: `/world/${worldId}/map`, label: t("sidebar.nav.map"), icon: "🗺" },
-    { to: `/world/${worldId}/timeline`, label: t("sidebar.nav.timeline"), icon: "⏳" },
-    { to: `/world/${worldId}/relations`, label: t("sidebar.nav.relations"), icon: "🔗" },
-    { to: `/world/${worldId}/storyboard`, label: t("sidebar.nav.storyboard"), icon: "🎬" },
-    { to: `/world/${worldId}/outline`, label: t("sidebar.nav.outline"), icon: "📖" },
-    { to: `/world/${worldId}/writing`, label: t("sidebar.nav.writing"), icon: "✍" },
-    { to: `/world/${worldId}/script`, label: t("sidebar.nav.script"), icon: "🎭" },
-    { to: `/world/${worldId}/narrative`, label: t("sidebar.nav.narrative"), icon: "🌿" },
-  ];
-  const bottomNavItems: NavItem[] = [
-    { to: `/world/${worldId}/templates`, label: t("sidebar.nav.templates"), icon: "⚙" },
-    { to: `/world/${worldId}/settings`, label: t("sidebar.nav.settings"), icon: "👤" },
-  ];
+  // 公開唯讀展示版（見 demoMode.ts）只留搜尋／世界首頁：其餘工具頁面在 App.tsx 的路由層級
+  // 已經整個擋掉，這裡連連結都不放，避免訪客點了才發現被導回首頁
+  const navItems: NavItem[] = isReadOnlyDemo
+    ? [
+        { to: `/world/${worldId}/search`, label: t("sidebar.nav.search"), icon: "🔍" },
+        { to: `/world/${worldId}`, label: t("sidebar.nav.worldHome"), icon: "🏠", end: true },
+      ]
+    : [
+        { to: `/world/${worldId}/search`, label: t("sidebar.nav.search"), icon: "🔍" },
+        { to: `/world/${worldId}`, label: t("sidebar.nav.worldHome"), icon: "🏠", end: true },
+        { to: `/world/${worldId}/map`, label: t("sidebar.nav.map"), icon: "🗺" },
+        { to: `/world/${worldId}/timeline`, label: t("sidebar.nav.timeline"), icon: "⏳" },
+        { to: `/world/${worldId}/relations`, label: t("sidebar.nav.relations"), icon: "🔗" },
+        { to: `/world/${worldId}/storyboard`, label: t("sidebar.nav.storyboard"), icon: "🎬" },
+        { to: `/world/${worldId}/outline`, label: t("sidebar.nav.outline"), icon: "📖" },
+        { to: `/world/${worldId}/writing`, label: t("sidebar.nav.writing"), icon: "✍" },
+        { to: `/world/${worldId}/script`, label: t("sidebar.nav.script"), icon: "🎭" },
+        { to: `/world/${worldId}/narrative`, label: t("sidebar.nav.narrative"), icon: "🌿" },
+      ];
+  const bottomNavItems: NavItem[] = isReadOnlyDemo
+    ? []
+    : [
+        { to: `/world/${worldId}/templates`, label: t("sidebar.nav.templates"), icon: "⚙" },
+        { to: `/world/${worldId}/settings`, label: t("sidebar.nav.settings"), icon: "👤" },
+      ];
 
   if (collapsed) {
     return (
@@ -205,39 +215,43 @@ export default function Sidebar({ worldId, worldName }: SidebarProps) {
             ⇲
           </button>
         </div>
-        <SidebarLink to={`/world/${worldId}/map`} label={t("sidebar.nav.map")} />
-        <SidebarLink to={`/world/${worldId}/timeline`} label={t("sidebar.nav.timeline")} />
-        <SidebarLink to={`/world/${worldId}/relations`} label={t("sidebar.nav.relations")} />
-        <SidebarLink to={`/world/${worldId}/storyboard`} label={t("sidebar.nav.storyboard")} />
-        <SidebarLink to={`/world/${worldId}/outline`} label={t("sidebar.nav.outline")} />
-        <div style={{ marginTop: 6 }}>
-          <button
-            className="btn-ghost"
-            // 同下面「條目分類」收合按鈕的理由——避免搶走新增分類輸入框的焦點，意外觸發送出
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => setCreationCollapsed((c) => !c)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-              width: "100%",
-              padding: "6px 10px",
-              fontSize: 14,
-              color: "var(--text-muted)",
-              justifyContent: "flex-start",
-            }}
-          >
-            <span>{creationCollapsed ? "▸" : "▾"}</span>
-            <span>{t("sidebar.creation")}</span>
-          </button>
-          {!creationCollapsed && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 2, paddingLeft: 20 }}>
-              <SidebarLink to={`/world/${worldId}/writing`} label={t("sidebar.nav.writing")} />
-              <SidebarLink to={`/world/${worldId}/script`} label={t("sidebar.nav.script")} />
-              <SidebarLink to={`/world/${worldId}/narrative`} label={t("sidebar.nav.narrative")} />
+        {!isReadOnlyDemo && (
+          <>
+            <SidebarLink to={`/world/${worldId}/map`} label={t("sidebar.nav.map")} />
+            <SidebarLink to={`/world/${worldId}/timeline`} label={t("sidebar.nav.timeline")} />
+            <SidebarLink to={`/world/${worldId}/relations`} label={t("sidebar.nav.relations")} />
+            <SidebarLink to={`/world/${worldId}/storyboard`} label={t("sidebar.nav.storyboard")} />
+            <SidebarLink to={`/world/${worldId}/outline`} label={t("sidebar.nav.outline")} />
+            <div style={{ marginTop: 6 }}>
+              <button
+                className="btn-ghost"
+                // 同下面「條目分類」收合按鈕的理由——避免搶走新增分類輸入框的焦點，意外觸發送出
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => setCreationCollapsed((c) => !c)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                  width: "100%",
+                  padding: "6px 10px",
+                  fontSize: 14,
+                  color: "var(--text-muted)",
+                  justifyContent: "flex-start",
+                }}
+              >
+                <span>{creationCollapsed ? "▸" : "▾"}</span>
+                <span>{t("sidebar.creation")}</span>
+              </button>
+              {!creationCollapsed && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 2, paddingLeft: 20 }}>
+                  <SidebarLink to={`/world/${worldId}/writing`} label={t("sidebar.nav.writing")} />
+                  <SidebarLink to={`/world/${worldId}/script`} label={t("sidebar.nav.script")} />
+                  <SidebarLink to={`/world/${worldId}/narrative`} label={t("sidebar.nav.narrative")} />
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </nav>
 
       <div style={{ padding: "0 10px", marginTop: 10, flex: 1, overflowY: "auto" }}>
@@ -270,17 +284,19 @@ export default function Sidebar({ worldId, worldName }: SidebarProps) {
             <span>{categoriesCollapsed ? "▸" : "▾"}</span>
             <span>{t("sidebar.categories")}</span>
           </button>
-          <button
-            className="btn-ghost"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => {
-              setAddingCategory(true);
-              setCategoriesCollapsed(false);
-            }}
-            title={t("sidebar.addCategory")}
-          >
-            ＋
-          </button>
+          {!isReadOnlyDemo && (
+            <button
+              className="btn-ghost"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                setAddingCategory(true);
+                setCategoriesCollapsed(false);
+              }}
+              title={t("sidebar.addCategory")}
+            >
+              ＋
+            </button>
+          )}
         </div>
         {!categoriesCollapsed && (
           <div style={{ display: "flex", flexDirection: "column", gap: 2, paddingLeft: 20 }}>
@@ -308,10 +324,12 @@ export default function Sidebar({ worldId, worldName }: SidebarProps) {
         )}
       </div>
 
-      <div style={{ padding: 10, borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 4 }}>
-        <SidebarLink to={`/world/${worldId}/templates`} label={t("sidebar.nav.templates")} />
-        <SidebarLink to={`/world/${worldId}/settings`} label={t("sidebar.nav.settings")} />
-      </div>
+      {!isReadOnlyDemo && (
+        <div style={{ padding: 10, borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 4 }}>
+          <SidebarLink to={`/world/${worldId}/templates`} label={t("sidebar.nav.templates")} />
+          <SidebarLink to={`/world/${worldId}/settings`} label={t("sidebar.nav.settings")} />
+        </div>
+      )}
     </aside>
   );
 }

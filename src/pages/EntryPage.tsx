@@ -24,6 +24,7 @@ import VersionHistoryDialog from "../components/common/VersionHistoryDialog";
 import { useLocalUser } from "../localUser";
 import { getLocalUser } from "../data/repositories/localUser";
 import { useLanguage, categoryDisplayName } from "../i18n";
+import { isReadOnlyDemo } from "../demoMode";
 
 // 模組層級登記「目前正在編輯中」的條目 id（進入編輯時 +1、離開編輯時 -1）；
 // 主畫面與側邊面板各自是獨立的 EntryPage 實例，靠這個共用登記表偵測「同一條目被同時在兩處編輯」
@@ -85,7 +86,7 @@ export default function EntryPage({ entryIdOverride, worldIdOverride, embedded =
     [entry?.categoryId]
   );
 
-  const [editing, setEditing] = useState(!embedded && searchParams.get("edit") === "1");
+  const [editing, setEditing] = useState(!isReadOnlyDemo && !embedded && searchParams.get("edit") === "1");
   const [draft, setDraft] = useState<Entry | null>(null);
   const [incoming, setIncoming] = useState<IncomingRelation[]>([]);
   const [showAddField, setShowAddField] = useState(false);
@@ -594,14 +595,16 @@ export default function EntryPage({ entryIdOverride, worldIdOverride, embedded =
               ⇲
             </button>
           )}
-          <button
-            className="btn-ghost"
-            onClick={handleToggleStar}
-            title={active.starred ? t("entryPage.unstarWholeCard") : t("entryPage.starWholeCard")}
-            style={{ color: active.starred ? "var(--accent)" : "var(--text-faint)", fontSize: 18 }}
-          >
-            {active.starred ? "★" : "☆"}
-          </button>
+          {!isReadOnlyDemo && (
+            <button
+              className="btn-ghost"
+              onClick={handleToggleStar}
+              title={active.starred ? t("entryPage.unstarWholeCard") : t("entryPage.starWholeCard")}
+              style={{ color: active.starred ? "var(--accent)" : "var(--text-faint)", fontSize: 18 }}
+            >
+              {active.starred ? "★" : "☆"}
+            </button>
+          )}
           {editing ? (
             <>
               <ColorInput label={t("entryPage.titleColorLabel")} value={draft?.titleColor} onChange={(c) => updateDraft({ titleColor: c || undefined })} allowClear worldId={worldId} />
@@ -613,20 +616,22 @@ export default function EntryPage({ entryIdOverride, worldIdOverride, embedded =
               </button>
             </>
           ) : (
-            <>
-              <button className="btn" onClick={() => setShowExport(true)}>
-                {t("entryPage.exportManuscript")}
-              </button>
-              <button className="btn" onClick={() => setShowHistory(true)}>
-                {t("common.versionHistory")}
-              </button>
-              <button className="btn btn-primary" onClick={startEdit}>
-                {t("common.edit")}
-              </button>
-              <button className="btn btn-danger" onClick={handleDelete}>
-                {t("entryCard.deleteConfirm.title")}
-              </button>
-            </>
+            !isReadOnlyDemo && (
+              <>
+                <button className="btn" onClick={() => setShowExport(true)}>
+                  {t("entryPage.exportManuscript")}
+                </button>
+                <button className="btn" onClick={() => setShowHistory(true)}>
+                  {t("common.versionHistory")}
+                </button>
+                <button className="btn btn-primary" onClick={startEdit}>
+                  {t("common.edit")}
+                </button>
+                <button className="btn btn-danger" onClick={handleDelete}>
+                  {t("entryCard.deleteConfirm.title")}
+                </button>
+              </>
+            )
           )}
         </div>
       </div>
@@ -729,7 +734,7 @@ export default function EntryPage({ entryIdOverride, worldIdOverride, embedded =
         onChangeExtraSlotValue={changeExtraSlotValue}
         onChangeExtraSlotType={changeExtraSlotType}
         onChangeExtraSlotChartConfig={changeExtraSlotChartConfig}
-        onToggleStar={handleToggleFieldStar}
+        onToggleStar={isReadOnlyDemo ? undefined : handleToggleFieldStar}
         onRemoveField={removeField}
         onDuplicateField={duplicateField}
         onRelabelField={relabelField}

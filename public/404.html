@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Building Island</title>
+    <script type="text/javascript">
+      // GitHub Pages 靜態伺服器不知道 react-router 的深層路由（例如 /buildingIsland/world/xyz）
+      // 是什麼，一律回應 404 並吐出這個頁面；這裡把整個路徑編碼進查詢字串導回 index.html，
+      // 讓 index.html 裡對應的還原腳本解碼、用 history.replaceState 換回原本網址，react-router
+      // 才能正常接手——標準做法見 https://github.com/rafgraph/spa-github-pages
+      var pathSegmentsToKeep = 1;
+
+      var l = window.location;
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
+        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+        l.hash
+      );
+    </script>
+  </head>
+  <body></body>
+</html>

@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:demo": "vite --mode demo --port 5999 --strictPort",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "preview:demo": "vite preview --base=/buildingIsland/ --port 4173"
   },
   "dependencies": {
     "@tiptap/core": "^3.30.2",

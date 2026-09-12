@@ -15,6 +15,7 @@ import BulkActionBar from "../components/common/BulkActionBar";
 import VersionHistoryDialog from "../components/common/VersionHistoryDialog";
 import { useLanguage, categoryDisplayName } from "../i18n";
 import { useDragToFolder } from "../data/reorder";
+import { isReadOnlyDemo } from "../demoMode";
 import type { Template } from "../data/types";
 
 type SortMode = "name" | "updatedAt";
@@ -158,7 +159,7 @@ export default function CategoryPage({ categoryIdOverride, worldIdOverride, embe
             <option value="name">{t("categoryPage.sortByName")}</option>
             <option value="updatedAt">{t("categoryPage.sortByUpdated")}</option>
           </select>
-          {!isSampleWorld && (
+          {!isSampleWorld && !isReadOnlyDemo && (
             <button
               className={bulkMode ? "btn btn-primary" : "btn"}
               onClick={() => {
@@ -169,22 +170,26 @@ export default function CategoryPage({ categoryIdOverride, worldIdOverride, embe
               {t("categoryPage.bulkMode")}
             </button>
           )}
-          <button className="btn" onClick={() => setShowNewFolder(true)}>
-            {t("categoryPage.addFolder")}
-          </button>
-          <button
-            className="btn btn-primary"
-            onClick={() => {
-              setActiveFolderId(undefined);
-              setShowNewEntry(true);
-            }}
-          >
-            {t("categoryPage.addEntry")}
-          </button>
-          <button className="btn" onClick={() => setShowHistory(true)}>
-            {t("common.versionHistory")}
-          </button>
-          {!category.isBuiltIn && (
+          {!isReadOnlyDemo && (
+            <>
+              <button className="btn" onClick={() => setShowNewFolder(true)}>
+                {t("categoryPage.addFolder")}
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  setActiveFolderId(undefined);
+                  setShowNewEntry(true);
+                }}
+              >
+                {t("categoryPage.addEntry")}
+              </button>
+              <button className="btn" onClick={() => setShowHistory(true)}>
+                {t("common.versionHistory")}
+              </button>
+            </>
+          )}
+          {!category.isBuiltIn && !isReadOnlyDemo && (
             <button className="btn btn-danger" onClick={handleDeleteCategory}>
               {t("categoryPage.deleteCategory")}
             </button>
@@ -239,7 +244,7 @@ export default function CategoryPage({ categoryIdOverride, worldIdOverride, embe
                   {folder.description && (
                     <span style={{ color: "var(--text-muted)", fontSize: 12 }}>— {folder.description}</span>
                   )}
-                  {!bulkMode && (
+                  {!bulkMode && !isReadOnlyDemo && (
                     <>
                       <button
                         className="btn-ghost"
@@ -269,7 +274,7 @@ export default function CategoryPage({ categoryIdOverride, worldIdOverride, embe
                         selected={selectedIds.has(entry.id)}
                         onToggleSelect={() => toggleSelect(entry.id)}
                         embedded={embedded}
-                        dragProps={dragMove.itemDragProps(entry.id, !bulkMode)}
+                        dragProps={dragMove.itemDragProps(entry.id, !bulkMode && !isReadOnlyDemo)}
                       />
                     ))}
                     {items.length === 0 && <p style={{ color: "var(--text-faint)", fontSize: 13 }}>{t("categoryPage.folderEmpty")}</p>}
@@ -295,7 +300,7 @@ export default function CategoryPage({ categoryIdOverride, worldIdOverride, embe
             selected={selectedIds.has(entry.id)}
             onToggleSelect={() => toggleSelect(entry.id)}
             embedded={embedded}
-            dragProps={dragMove.itemDragProps(entry.id, !bulkMode)}
+            dragProps={dragMove.itemDragProps(entry.id, !bulkMode && !isReadOnlyDemo)}
           />
         ))}
         {entries && folders && unfiled.length === 0 && folders.length === 0 && (

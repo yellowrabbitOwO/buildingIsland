@@ -1,5 +1,6 @@
 import Dexie, { type Table } from "dexie";
 import { attachVersionHistoryHook } from "./versionHistory";
+import { isReadOnlyDemo } from "../demoMode";
 import type {
   World,
   Category,
@@ -201,7 +202,31 @@ export class BuildingIslandDB extends Dexie {
     register(this.timelines, "timelines");
     register(this.timelineBranches, "timelineBranches");
     register(this.timelineEvents, "timelineEvents");
+
+    // 公開唯讀展示版（見 demoMode.ts）的最後一道防線：不管畫面上是不是漏藏了哪個新增／編輯／
+    // 刪除按鈕，這裡直接在資料層擋掉所有寫入，讓「唯讀」是保證成立的，不是只靠每個頁面自己小心。
+    // demoBootstrapDone 在開機當下（main.tsx 建好內建種子資料＋唯一的展示帳號／範例世界之前）
+    // 還是 false，讓那段必要的初始化寫入照樣放行，寫完才由 main.tsx 呼叫 markDemoBootstrapDone()
+    // 正式鎖上——之後不管是訪客自己的操作、還是任何後續程式碼，一律擋下
+    if (isReadOnlyDemo) {
+      const blockWrite = () => {
+        if (!demoBootstrapDone) return;
+        throw new Error("公開展示版為唯讀模式，無法修改資料。");
+      };
+      for (const table of this.tables) {
+        table.hook("creating", blockWrite);
+        table.hook("updating", blockWrite);
+        table.hook("deleting", blockWrite);
+      }
+    }
   }
+}
+
+let demoBootstrapDone = !isReadOnlyDemo;
+
+/** 只有 main.tsx 的展示版開機流程會呼叫這個——見上面 demoBootstrapDone 的說明 */
+export function markDemoBootstrapDone(): void {
+  demoBootstrapDone = true;
 }
 
 export const db = new BuildingIslandDB();

@@ -11,6 +11,7 @@ import { useLocalUser } from "../localUser";
 import { useConfirm } from "../components/common/ConfirmProvider";
 import LocalUserAccountButton from "../components/localUser/LocalUserAccountButton";
 import type { World } from "../data/types";
+import { isReadOnlyDemo } from "../demoMode";
 
 export default function WorldListPage() {
   const { currentUserId, setCurrentUserId } = useLocalUser();
@@ -67,15 +68,19 @@ export default function WorldListPage() {
             onChange={(e) => setQuery(e.target.value)}
             style={{ width: 180 }}
           />
-          <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
-            {t("common.createWorld")}
-          </button>
+          {!isReadOnlyDemo && (
+            <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
+              {t("common.createWorld")}
+            </button>
+          )}
           <button className="btn" onClick={toggleTheme} title={t("common.toggleDisplayMode")}>
             {theme === "dark" ? "🌙" : "☀️"}
           </button>
-          <button className="btn" onClick={() => navigate("/settings")}>
-            {t("worldList.accountSettings")}
-          </button>
+          {!isReadOnlyDemo && (
+            <button className="btn" onClick={() => navigate("/settings")}>
+              {t("worldList.accountSettings")}
+            </button>
+          )}
         </div>
       </header>
 
@@ -123,16 +128,18 @@ export default function WorldListPage() {
                 {world.description || t("worldList.noDescription")}
               </p>
             </div>
-            <div style={{ display: "flex", gap: 6 }} onClick={(e) => e.stopPropagation()}>
-              {!world.isSample && (
-                <button className="btn" onClick={() => setEditing(world)}>
-                  {t("worldList.modify")}
+            {!isReadOnlyDemo && (
+              <div style={{ display: "flex", gap: 6 }} onClick={(e) => e.stopPropagation()}>
+                {!world.isSample && (
+                  <button className="btn" onClick={() => setEditing(world)}>
+                    {t("worldList.modify")}
+                  </button>
+                )}
+                <button className="btn btn-danger" onClick={() => handleDelete(world)}>
+                  {t("common.delete")}
                 </button>
-              )}
-              <button className="btn btn-danger" onClick={() => handleDelete(world)}>
-                {t("common.delete")}
-              </button>
-            </div>
+              </div>
+            )}
           </div>
         ))}
       </div>

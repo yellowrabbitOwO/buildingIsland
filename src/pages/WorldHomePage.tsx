@@ -23,6 +23,7 @@ import { listStarredStoryOutlines } from "../data/repositories/storyOutline";
 import { extractPlainText } from "../data/richTextText";
 import { useSidePanel } from "../components/common/SidePanelProvider";
 import { useLanguage, categoryDisplayName } from "../i18n";
+import { isReadOnlyDemo } from "../demoMode";
 import StoryboardPreview from "../components/storyboard/StoryboardPreview";
 import TimelinePreview from "../components/timeline/TimelinePreview";
 import StoryOutlinePreview from "../components/story-outline/StoryOutlinePreview";
@@ -114,7 +115,7 @@ export default function WorldHomePage({ worldOverride, embedded = false }: World
   const { handleProps, rowProps, dragIndex, dropIndicatorStyle } = useDragReorder(
     combinedStarred ?? [],
     (next) => reorderStarredItems(next.map((item): StarredRef => ({ kind: item.kind, id: item.data.id }))),
-    !!combinedStarred && combinedStarred.length > 1
+    !isReadOnlyDemo && !!combinedStarred && combinedStarred.length > 1
   );
 
   const categories = useLiveQuery(() => (world ? db.categories.where({ worldId: world.id }).toArray() : []), [world?.id]);
@@ -165,7 +166,7 @@ export default function WorldHomePage({ worldOverride, embedded = false }: World
               </div>
               <p style={{ color: "var(--text-muted)", marginTop: 6 }}>{world.description || t("worldHome.noDescription")}</p>
             </div>
-            {!world.isSample && (
+            {!world.isSample && !isReadOnlyDemo && (
               <button className="btn" onClick={() => setEditing(true)}>
                 {t("worldHome.editSettings")}
               </button>
@@ -194,7 +195,7 @@ export default function WorldHomePage({ worldOverride, embedded = false }: World
               <div style={{ padding: 12 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    {combinedStarred.length > 1 && (
+                    {!isReadOnlyDemo && combinedStarred.length > 1 && (
                       <span {...handleProps(i)} style={{ cursor: "grab", color: "var(--text-faint)" }} title={t("worldHome.dragToReorder")}>
                         ⠿
                       </span>
@@ -221,6 +222,7 @@ export default function WorldHomePage({ worldOverride, embedded = false }: World
                                     ? t("worldHome.kind.timeline")
                                     : t("worldHome.kind.storyOutline")}
                     </span>
+                    {!isReadOnlyDemo && (
                     <button
                       className="btn-ghost"
                       title={t("common.edit")}
@@ -258,6 +260,7 @@ export default function WorldHomePage({ worldOverride, embedded = false }: World
                     >
                       ✎
                     </button>
+                    )}
                   </div>
                 </div>
                 {item.kind === "entry" ? (

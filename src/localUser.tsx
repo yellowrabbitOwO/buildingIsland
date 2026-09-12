@@ -21,7 +21,10 @@ interface LocalUserContextValue {
 
 const LocalUserContext = createContext<LocalUserContextValue | null>(null);
 
-const STORAGE_KEY = "building-island-local-user";
+/** 匯出供 main.tsx 的公開唯讀展示版開機流程直接寫入 localStorage，讓訪客免選使用者、
+ * 一開機就自動登入唯一的展示帳號（見 demoMode.ts） */
+export const LOCAL_USER_STORAGE_KEY = "building-island-local-user";
+const STORAGE_KEY = LOCAL_USER_STORAGE_KEY;
 const LAST_USER_STORAGE_KEY = "building-island-last-local-user";
 
 export function LocalUserProvider({ children }: { children: ReactNode }) {

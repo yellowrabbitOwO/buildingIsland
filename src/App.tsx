@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { Navigate, createBrowserRouter, RouterProvider, useParams } from "react-router-dom";
 import { ThemeProvider } from "./theme";
 import { LanguageProvider } from "./i18n";
@@ -29,6 +30,7 @@ import TimelinePage from "./pages/TimelinePage";
 import TimelineViewPage from "./pages/TimelineViewPage";
 import StoryOutlinePage from "./pages/StoryOutlinePage";
 import StoryOutlineViewPage from "./pages/StoryOutlineViewPage";
+import { isReadOnlyDemo } from "./demoMode";
 
 // react-router 對同一路由只換參數不會重新掛載元件；分類/條目切換時強制以 id 作為
 // key 重新掛載，避免頁面內部的本地 UI 狀態（如批量選取）殘留跨到別的分類/條目。
@@ -93,7 +95,19 @@ function HomeGate() {
 // 才放行，避免直接用網址列跳過 HomeGate 的登入流程
 function SettingsGate() {
   const { currentUserId } = useLocalUser();
+  if (isReadOnlyDemo) return <Navigate to="/" replace />;
   return currentUserId ? <AccountSettingsPage /> : <Navigate to="/" replace />;
+}
+
+// 公開唯讀展示版（見 demoMode.ts）用網址列直接打深層工具頁面（地圖編輯器、範本管理…）一律導回
+// 世界首頁——擋的是路由本身，不是只藏按鈕，即使訪客手動改網址也進不去
+function DemoBlocked() {
+  const { worldId } = useParams<{ worldId: string }>();
+  return <Navigate to={`/world/${worldId}`} replace />;
+}
+
+function demoGuarded(element: ReactElement): ReactElement {
+  return isReadOnlyDemo ? <DemoBlocked /> : element;
 }
 
 const router = createBrowserRouter([
@@ -106,29 +120,33 @@ const router = createBrowserRouter([
       { index: true, element: <WorldHomePage /> },
       { path: "category/:categoryId", element: <KeyedCategoryPage /> },
       { path: "entry/:entryId", element: <KeyedEntryPage /> },
-      { path: "templates", element: <TemplateManagerPage /> },
-      { path: "settings", element: <UserSettingsPage /> },
       { path: "search", element: <SearchPage /> },
-      { path: "relations", element: <RelationGraphPage /> },
-      { path: "relations/:graphId", element: <KeyedRelationGraphViewPage /> },
-      { path: "map", element: <MapPage /> },
-      { path: "map/:mapId", element: <KeyedMapViewPage /> },
-      { path: "narrative", element: <NarrativeGraphPage /> },
-      { path: "narrative/:graphId", element: <KeyedNarrativeGraphViewPage /> },
-      { path: "writing", element: <WritingDocPage /> },
-      { path: "writing/:docId", element: <KeyedWritingDocViewPage /> },
-      { path: "storyboard", element: <StoryboardPage /> },
-      { path: "storyboard/:storyboardId", element: <KeyedStoryboardViewPage /> },
-      { path: "script", element: <ScriptDocPage /> },
-      { path: "script/:docId", element: <KeyedScriptDocViewPage /> },
-      { path: "timeline", element: <TimelinePage /> },
-      { path: "timeline/:timelineId", element: <KeyedTimelineViewPage /> },
-      { path: "outline", element: <StoryOutlinePage /> },
-      { path: "outline/:outlineId", element: <KeyedStoryOutlineViewPage /> },
+      { path: "templates", element: demoGuarded(<TemplateManagerPage />) },
+      { path: "settings", element: demoGuarded(<UserSettingsPage />) },
+      { path: "relations", element: demoGuarded(<RelationGraphPage />) },
+      { path: "relations/:graphId", element: demoGuarded(<KeyedRelationGraphViewPage />) },
+      { path: "map", element: demoGuarded(<MapPage />) },
+      { path: "map/:mapId", element: demoGuarded(<KeyedMapViewPage />) },
+      { path: "narrative", element: demoGuarded(<NarrativeGraphPage />) },
+      { path: "narrative/:graphId", element: demoGuarded(<KeyedNarrativeGraphViewPage />) },
+      { path: "writing", element: demoGuarded(<WritingDocPage />) },
+      { path: "writing/:docId", element: demoGuarded(<KeyedWritingDocViewPage />) },
+      { path: "storyboard", element: demoGuarded(<StoryboardPage />) },
+      { path: "storyboard/:storyboardId", element: demoGuarded(<KeyedStoryboardViewPage />) },
+      { path: "script", element: demoGuarded(<ScriptDocPage />) },
+      { path: "script/:docId", element: demoGuarded(<KeyedScriptDocViewPage />) },
+      { path: "timeline", element: demoGuarded(<TimelinePage />) },
+      { path: "timeline/:timelineId", element: demoGuarded(<KeyedTimelineViewPage />) },
+      { path: "outline", element: demoGuarded(<StoryOutlinePage />) },
+      { path: "outline/:outlineId", element: demoGuarded(<KeyedStoryOutlineViewPage />) },
     ],
   },
   { path: "*", element: <Navigate to="/" replace /> },
-]);
+], {
+  // GitHub Pages 專案頁面部署在 /<repo>/ 子路徑下時，Vite 會把這裡設成該子路徑（見
+  // vite.config.ts 的 base）；本機開發／根路徑部署時就是預設的 "/"，basename 給 "/" 等同不設
+  basename: import.meta.env.BASE_URL,
+});
 
 function App() {
   return (
