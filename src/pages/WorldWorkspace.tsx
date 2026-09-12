@@ -24,7 +24,7 @@ export default function WorldWorkspace() {
     <SidePanelProvider key={world.id}>
       <div style={{ display: "flex" }}>
         <Sidebar worldId={world.id} worldName={world.name} />
-        <main style={{ flex: 1, minWidth: 0, padding: "24px 32px", maxWidth: 1000 }}>
+        <main style={{ flex: 1, minWidth: 0, padding: "24px 32px" }}>
           <Outlet context={{ world }} />
         </main>
         <SidePanelHost world={world} />
