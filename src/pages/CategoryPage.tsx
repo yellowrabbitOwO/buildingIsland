@@ -159,9 +159,10 @@ export default function CategoryPage({ categoryIdOverride, worldIdOverride, embe
             <option value="name">{t("categoryPage.sortByName")}</option>
             <option value="updatedAt">{t("categoryPage.sortByUpdated")}</option>
           </select>
-          {!isSampleWorld && !isReadOnlyDemo && (
+          {!isSampleWorld && (
             <button
               className={bulkMode ? "btn btn-primary" : "btn"}
+              disabled={isReadOnlyDemo}
               onClick={() => {
                 setBulkMode((v) => !v);
                 setSelectedIds(new Set());
@@ -170,27 +171,24 @@ export default function CategoryPage({ categoryIdOverride, worldIdOverride, embe
               {t("categoryPage.bulkMode")}
             </button>
           )}
-          {!isReadOnlyDemo && (
-            <>
-              <button className="btn" onClick={() => setShowNewFolder(true)}>
-                {t("categoryPage.addFolder")}
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={() => {
-                  setActiveFolderId(undefined);
-                  setShowNewEntry(true);
-                }}
-              >
-                {t("categoryPage.addEntry")}
-              </button>
-              <button className="btn" onClick={() => setShowHistory(true)}>
-                {t("common.versionHistory")}
-              </button>
-            </>
-          )}
-          {!category.isBuiltIn && !isReadOnlyDemo && (
-            <button className="btn btn-danger" onClick={handleDeleteCategory}>
+          <button className="btn" disabled={isReadOnlyDemo} onClick={() => setShowNewFolder(true)}>
+            {t("categoryPage.addFolder")}
+          </button>
+          <button
+            className="btn btn-primary"
+            disabled={isReadOnlyDemo}
+            onClick={() => {
+              setActiveFolderId(undefined);
+              setShowNewEntry(true);
+            }}
+          >
+            {t("categoryPage.addEntry")}
+          </button>
+          <button className="btn" disabled={isReadOnlyDemo} onClick={() => setShowHistory(true)}>
+            {t("common.versionHistory")}
+          </button>
+          {!category.isBuiltIn && (
+            <button className="btn btn-danger" disabled={isReadOnlyDemo} onClick={handleDeleteCategory}>
               {t("categoryPage.deleteCategory")}
             </button>
           )}
@@ -244,10 +242,11 @@ export default function CategoryPage({ categoryIdOverride, worldIdOverride, embe
                   {folder.description && (
                     <span style={{ color: "var(--text-muted)", fontSize: 12 }}>— {folder.description}</span>
                   )}
-                  {!bulkMode && !isReadOnlyDemo && (
+                  {!bulkMode && (
                     <>
                       <button
                         className="btn-ghost"
+                        disabled={isReadOnlyDemo}
                         style={{ marginLeft: "auto" }}
                         onClick={() => {
                           setActiveFolderId(folder.id);
@@ -256,7 +255,7 @@ export default function CategoryPage({ categoryIdOverride, worldIdOverride, embe
                       >
                         {t("categoryPage.addToFolder")}
                       </button>
-                      <button className="btn-ghost" onClick={() => handleDeleteFolder(folder.id, folder.name)}>
+                      <button className="btn-ghost" disabled={isReadOnlyDemo} onClick={() => handleDeleteFolder(folder.id, folder.name)}>
                         {t("common.delete")}
                       </button>
                     </>

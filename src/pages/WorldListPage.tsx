@@ -68,19 +68,15 @@ export default function WorldListPage() {
             onChange={(e) => setQuery(e.target.value)}
             style={{ width: 180 }}
           />
-          {!isReadOnlyDemo && (
-            <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
-              {t("common.createWorld")}
-            </button>
-          )}
+          <button className="btn btn-primary" disabled={isReadOnlyDemo} onClick={() => setShowCreate(true)}>
+            {t("common.createWorld")}
+          </button>
           <button className="btn" onClick={toggleTheme} title={t("common.toggleDisplayMode")}>
             {theme === "dark" ? "🌙" : "☀️"}
           </button>
-          {!isReadOnlyDemo && (
-            <button className="btn" onClick={() => navigate("/settings")}>
-              {t("worldList.accountSettings")}
-            </button>
-          )}
+          <button className="btn" disabled={isReadOnlyDemo} onClick={() => navigate("/settings")}>
+            {t("worldList.accountSettings")}
+          </button>
         </div>
       </header>
 
@@ -128,18 +124,16 @@ export default function WorldListPage() {
                 {world.description || t("worldList.noDescription")}
               </p>
             </div>
-            {!isReadOnlyDemo && (
-              <div style={{ display: "flex", gap: 6 }} onClick={(e) => e.stopPropagation()}>
-                {!world.isSample && (
-                  <button className="btn" onClick={() => setEditing(world)}>
-                    {t("worldList.modify")}
-                  </button>
-                )}
-                <button className="btn btn-danger" onClick={() => handleDelete(world)}>
-                  {t("common.delete")}
+            <div style={{ display: "flex", gap: 6 }} onClick={(e) => e.stopPropagation()}>
+              {!world.isSample && (
+                <button className="btn" disabled={isReadOnlyDemo} onClick={() => setEditing(world)}>
+                  {t("worldList.modify")}
                 </button>
-              </div>
-            )}
+              )}
+              <button className="btn btn-danger" disabled={isReadOnlyDemo} onClick={() => handleDelete(world)}>
+                {t("common.delete")}
+              </button>
+            </div>
           </div>
         ))}
       </div>

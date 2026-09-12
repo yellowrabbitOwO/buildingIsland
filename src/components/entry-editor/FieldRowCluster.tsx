@@ -7,6 +7,7 @@ import FieldActionsMenu from "./FieldActionsMenu";
 import FieldHint from "../common/FieldHint";
 import { useDragReorder } from "../../data/reorder";
 import { useLanguage } from "../../i18n";
+import { isReadOnlyDemo } from "../../demoMode";
 
 interface FieldRowClusterProps {
   label: string;
@@ -129,6 +130,7 @@ export default function FieldRowCluster({
               {onToggleStar && (
                 <button
                   className="btn-ghost"
+                  disabled={isReadOnlyDemo}
                   style={{ color: starredFieldIds.includes(field.id) ? "var(--accent)" : "var(--text-faint)", flexShrink: 0 }}
                   onClick={() => onToggleStar(field.id)}
                   title={t("fieldRow.starFieldTitle")}

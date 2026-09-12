@@ -166,8 +166,8 @@ export default function WorldHomePage({ worldOverride, embedded = false }: World
               </div>
               <p style={{ color: "var(--text-muted)", marginTop: 6 }}>{world.description || t("worldHome.noDescription")}</p>
             </div>
-            {!world.isSample && !isReadOnlyDemo && (
-              <button className="btn" onClick={() => setEditing(true)}>
+            {!world.isSample && (
+              <button className="btn" disabled={isReadOnlyDemo} onClick={() => setEditing(true)}>
                 {t("worldHome.editSettings")}
               </button>
             )}
@@ -195,8 +195,12 @@ export default function WorldHomePage({ worldOverride, embedded = false }: World
               <div style={{ padding: 12 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    {!isReadOnlyDemo && combinedStarred.length > 1 && (
-                      <span {...handleProps(i)} style={{ cursor: "grab", color: "var(--text-faint)" }} title={t("worldHome.dragToReorder")}>
+                    {combinedStarred.length > 1 && (
+                      <span
+                        {...handleProps(i)}
+                        style={{ cursor: isReadOnlyDemo ? "not-allowed" : "grab", color: "var(--text-faint)" }}
+                        title={t("worldHome.dragToReorder")}
+                      >
                         ⠿
                       </span>
                     )}
@@ -222,10 +226,10 @@ export default function WorldHomePage({ worldOverride, embedded = false }: World
                                     ? t("worldHome.kind.timeline")
                                     : t("worldHome.kind.storyOutline")}
                     </span>
-                    {!isReadOnlyDemo && (
                     <button
                       className="btn-ghost"
                       title={t("common.edit")}
+                      disabled={isReadOnlyDemo}
                       onClick={() => {
                         if (item.kind === "entry") {
                           // 面板裡沒有分頁可跳轉，改成在面板本身切換到該條目（不會自動進入編輯模式）
@@ -260,7 +264,6 @@ export default function WorldHomePage({ worldOverride, embedded = false }: World
                     >
                       ✎
                     </button>
-                    )}
                   </div>
                 </div>
                 {item.kind === "entry" ? (

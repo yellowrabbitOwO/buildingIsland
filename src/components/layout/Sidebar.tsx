@@ -21,6 +21,9 @@ interface NavItem {
   label: string;
   icon: string;
   end?: boolean;
+  /** 公開唯讀展示版（見 demoMode.ts）：連結原樣留著看得到，只是不能點——維持「這個 app 有哪些
+   * 功能」的完整印象，跟隱藏起來比，訪客比較不會誤以為某個功能整個不存在 */
+  disabled?: boolean;
 }
 
 export default function Sidebar({ worldId, worldName }: SidebarProps) {
@@ -111,31 +114,24 @@ export default function Sidebar({ worldId, worldName }: SidebarProps) {
     setAddingCategory(false);
   };
 
-  // 公開唯讀展示版（見 demoMode.ts）只留搜尋／世界首頁：其餘工具頁面在 App.tsx 的路由層級
-  // 已經整個擋掉，這裡連連結都不放，避免訪客點了才發現被導回首頁
-  const navItems: NavItem[] = isReadOnlyDemo
-    ? [
-        { to: `/world/${worldId}/search`, label: t("sidebar.nav.search"), icon: "🔍" },
-        { to: `/world/${worldId}`, label: t("sidebar.nav.worldHome"), icon: "🏠", end: true },
-      ]
-    : [
-        { to: `/world/${worldId}/search`, label: t("sidebar.nav.search"), icon: "🔍" },
-        { to: `/world/${worldId}`, label: t("sidebar.nav.worldHome"), icon: "🏠", end: true },
-        { to: `/world/${worldId}/map`, label: t("sidebar.nav.map"), icon: "🗺" },
-        { to: `/world/${worldId}/timeline`, label: t("sidebar.nav.timeline"), icon: "⏳" },
-        { to: `/world/${worldId}/relations`, label: t("sidebar.nav.relations"), icon: "🔗" },
-        { to: `/world/${worldId}/storyboard`, label: t("sidebar.nav.storyboard"), icon: "🎬" },
-        { to: `/world/${worldId}/outline`, label: t("sidebar.nav.outline"), icon: "📖" },
-        { to: `/world/${worldId}/writing`, label: t("sidebar.nav.writing"), icon: "✍" },
-        { to: `/world/${worldId}/script`, label: t("sidebar.nav.script"), icon: "🎭" },
-        { to: `/world/${worldId}/narrative`, label: t("sidebar.nav.narrative"), icon: "🌿" },
-      ];
-  const bottomNavItems: NavItem[] = isReadOnlyDemo
-    ? []
-    : [
-        { to: `/world/${worldId}/templates`, label: t("sidebar.nav.templates"), icon: "⚙" },
-        { to: `/world/${worldId}/settings`, label: t("sidebar.nav.settings"), icon: "👤" },
-      ];
+  // 公開唯讀展示版（見 demoMode.ts）：工具頁面連結原樣留著，只是標成不能點——實際路由在
+  // App.tsx 的路由層級也擋著，就算不小心用其他方式點進去一樣會被導回世界首頁
+  const navItems: NavItem[] = [
+    { to: `/world/${worldId}/search`, label: t("sidebar.nav.search"), icon: "🔍" },
+    { to: `/world/${worldId}`, label: t("sidebar.nav.worldHome"), icon: "🏠", end: true },
+    { to: `/world/${worldId}/map`, label: t("sidebar.nav.map"), icon: "🗺", disabled: isReadOnlyDemo },
+    { to: `/world/${worldId}/timeline`, label: t("sidebar.nav.timeline"), icon: "⏳", disabled: isReadOnlyDemo },
+    { to: `/world/${worldId}/relations`, label: t("sidebar.nav.relations"), icon: "🔗", disabled: isReadOnlyDemo },
+    { to: `/world/${worldId}/storyboard`, label: t("sidebar.nav.storyboard"), icon: "🎬", disabled: isReadOnlyDemo },
+    { to: `/world/${worldId}/outline`, label: t("sidebar.nav.outline"), icon: "📖", disabled: isReadOnlyDemo },
+    { to: `/world/${worldId}/writing`, label: t("sidebar.nav.writing"), icon: "✍", disabled: isReadOnlyDemo },
+    { to: `/world/${worldId}/script`, label: t("sidebar.nav.script"), icon: "🎭", disabled: isReadOnlyDemo },
+    { to: `/world/${worldId}/narrative`, label: t("sidebar.nav.narrative"), icon: "🌿", disabled: isReadOnlyDemo },
+  ];
+  const bottomNavItems: NavItem[] = [
+    { to: `/world/${worldId}/templates`, label: t("sidebar.nav.templates"), icon: "⚙", disabled: isReadOnlyDemo },
+    { to: `/world/${worldId}/settings`, label: t("sidebar.nav.settings"), icon: "👤", disabled: isReadOnlyDemo },
+  ];
 
   if (collapsed) {
     return (
@@ -215,43 +211,39 @@ export default function Sidebar({ worldId, worldName }: SidebarProps) {
             ⇲
           </button>
         </div>
-        {!isReadOnlyDemo && (
-          <>
-            <SidebarLink to={`/world/${worldId}/map`} label={t("sidebar.nav.map")} />
-            <SidebarLink to={`/world/${worldId}/timeline`} label={t("sidebar.nav.timeline")} />
-            <SidebarLink to={`/world/${worldId}/relations`} label={t("sidebar.nav.relations")} />
-            <SidebarLink to={`/world/${worldId}/storyboard`} label={t("sidebar.nav.storyboard")} />
-            <SidebarLink to={`/world/${worldId}/outline`} label={t("sidebar.nav.outline")} />
-            <div style={{ marginTop: 6 }}>
-              <button
-                className="btn-ghost"
-                // 同下面「條目分類」收合按鈕的理由——避免搶走新增分類輸入框的焦點，意外觸發送出
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => setCreationCollapsed((c) => !c)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 4,
-                  width: "100%",
-                  padding: "6px 10px",
-                  fontSize: 14,
-                  color: "var(--text-muted)",
-                  justifyContent: "flex-start",
-                }}
-              >
-                <span>{creationCollapsed ? "▸" : "▾"}</span>
-                <span>{t("sidebar.creation")}</span>
-              </button>
-              {!creationCollapsed && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 2, paddingLeft: 20 }}>
-                  <SidebarLink to={`/world/${worldId}/writing`} label={t("sidebar.nav.writing")} />
-                  <SidebarLink to={`/world/${worldId}/script`} label={t("sidebar.nav.script")} />
-                  <SidebarLink to={`/world/${worldId}/narrative`} label={t("sidebar.nav.narrative")} />
-                </div>
-              )}
+        <SidebarLink to={`/world/${worldId}/map`} label={t("sidebar.nav.map")} disabled={isReadOnlyDemo} />
+        <SidebarLink to={`/world/${worldId}/timeline`} label={t("sidebar.nav.timeline")} disabled={isReadOnlyDemo} />
+        <SidebarLink to={`/world/${worldId}/relations`} label={t("sidebar.nav.relations")} disabled={isReadOnlyDemo} />
+        <SidebarLink to={`/world/${worldId}/storyboard`} label={t("sidebar.nav.storyboard")} disabled={isReadOnlyDemo} />
+        <SidebarLink to={`/world/${worldId}/outline`} label={t("sidebar.nav.outline")} disabled={isReadOnlyDemo} />
+        <div style={{ marginTop: 6 }}>
+          <button
+            className="btn-ghost"
+            // 同下面「條目分類」收合按鈕的理由——避免搶走新增分類輸入框的焦點，意外觸發送出
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => setCreationCollapsed((c) => !c)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              width: "100%",
+              padding: "6px 10px",
+              fontSize: 14,
+              color: "var(--text-muted)",
+              justifyContent: "flex-start",
+            }}
+          >
+            <span>{creationCollapsed ? "▸" : "▾"}</span>
+            <span>{t("sidebar.creation")}</span>
+          </button>
+          {!creationCollapsed && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 2, paddingLeft: 20 }}>
+              <SidebarLink to={`/world/${worldId}/writing`} label={t("sidebar.nav.writing")} disabled={isReadOnlyDemo} />
+              <SidebarLink to={`/world/${worldId}/script`} label={t("sidebar.nav.script")} disabled={isReadOnlyDemo} />
+              <SidebarLink to={`/world/${worldId}/narrative`} label={t("sidebar.nav.narrative")} disabled={isReadOnlyDemo} />
             </div>
-          </>
-        )}
+          )}
+        </div>
       </nav>
 
       <div style={{ padding: "0 10px", marginTop: 10, flex: 1, overflowY: "auto" }}>
@@ -284,19 +276,18 @@ export default function Sidebar({ worldId, worldName }: SidebarProps) {
             <span>{categoriesCollapsed ? "▸" : "▾"}</span>
             <span>{t("sidebar.categories")}</span>
           </button>
-          {!isReadOnlyDemo && (
-            <button
-              className="btn-ghost"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => {
-                setAddingCategory(true);
-                setCategoriesCollapsed(false);
-              }}
-              title={t("sidebar.addCategory")}
-            >
-              ＋
-            </button>
-          )}
+          <button
+            className="btn-ghost"
+            disabled={isReadOnlyDemo}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => {
+              setAddingCategory(true);
+              setCategoriesCollapsed(false);
+            }}
+            title={t("sidebar.addCategory")}
+          >
+            ＋
+          </button>
         </div>
         {!categoriesCollapsed && (
           <div style={{ display: "flex", flexDirection: "column", gap: 2, paddingLeft: 20 }}>
@@ -324,17 +315,35 @@ export default function Sidebar({ worldId, worldName }: SidebarProps) {
         )}
       </div>
 
-      {!isReadOnlyDemo && (
-        <div style={{ padding: 10, borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 4 }}>
-          <SidebarLink to={`/world/${worldId}/templates`} label={t("sidebar.nav.templates")} />
-          <SidebarLink to={`/world/${worldId}/settings`} label={t("sidebar.nav.settings")} />
-        </div>
-      )}
+      <div style={{ padding: 10, borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 4 }}>
+        <SidebarLink to={`/world/${worldId}/templates`} label={t("sidebar.nav.templates")} disabled={isReadOnlyDemo} />
+        <SidebarLink to={`/world/${worldId}/settings`} label={t("sidebar.nav.settings")} disabled={isReadOnlyDemo} />
+      </div>
     </aside>
   );
 }
 
-function SidebarLink({ to, label, end }: { to: string; label: string; end?: boolean }) {
+function SidebarLink({ to, label, end, disabled }: { to: string; label: string; end?: boolean; disabled?: boolean }) {
+  // disabled＝公開唯讀展示版的工具頁面連結（見 NavItem.disabled 說明）：換成不帶 to 的 span，
+  // 樣式維持跟一般連結一樣的排版位置，只是變淡、游標改成 not-allowed，真的點不進去，
+  // 不是「看起來能點但點了被導回去」那種容易讓人以為壞掉的體驗
+  if (disabled) {
+    return (
+      <span
+        aria-disabled="true"
+        style={{
+          display: "block",
+          padding: "6px 10px",
+          borderRadius: 6,
+          color: "var(--text-faint)",
+          opacity: 0.6,
+          cursor: "not-allowed",
+        }}
+      >
+        {label}
+      </span>
+    );
+  }
   return (
     <NavLink
       to={to}
@@ -355,7 +364,29 @@ function SidebarLink({ to, label, end }: { to: string; label: string; end?: bool
 }
 
 /** 側邊欄收合成一排時的單一導覽項目：只顯示圖示，用 title 提供完整名稱（滑鼠停留可見） */
-function CollapsedNavLink({ to, label, icon, end }: NavItem) {
+function CollapsedNavLink({ to, label, icon, end, disabled }: NavItem) {
+  if (disabled) {
+    return (
+      <span
+        aria-disabled="true"
+        title={label}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 36,
+          height: 36,
+          borderRadius: 6,
+          fontSize: 16,
+          color: "var(--text-faint)",
+          opacity: 0.6,
+          cursor: "not-allowed",
+        }}
+      >
+        {icon}
+      </span>
+    );
+  }
   return (
     <NavLink
       to={to}

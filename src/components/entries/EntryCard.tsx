@@ -113,44 +113,43 @@ export default function EntryCard({ entry, worldId, folders, bulkMode, selected,
             >
               ⇲
             </button>
-            {!isReadOnlyDemo && (
-              <>
-                <button
-                  className="btn-ghost"
-                  title={t("entryCard.star")}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleEntryStar(entry.id);
-                  }}
-                  style={{ color: entry.starred ? "var(--accent)" : "var(--text-faint)", fontSize: 16 }}
-                >
-                  {entry.starred ? "★" : "☆"}
-                </button>
-                <button
-                  className="btn-ghost"
-                  title={t("entryCard.moveToFolder")}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowMove(true);
-                  }}
-                >
-                  📁
-                </button>
-                <button
-                  className="btn-ghost"
-                  title={t("common.duplicate")}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    duplicateEntry(entry.id, undefined, t);
-                  }}
-                >
-                  ⧉
-                </button>
-                <button className="btn-ghost" title={t("entryCard.deleteConfirm.title")} onClick={handleDelete}>
-                  🗑
-                </button>
-              </>
-            )}
+            <button
+              className="btn-ghost"
+              title={t("entryCard.star")}
+              disabled={isReadOnlyDemo}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleEntryStar(entry.id);
+              }}
+              style={{ color: entry.starred ? "var(--accent)" : "var(--text-faint)", fontSize: 16 }}
+            >
+              {entry.starred ? "★" : "☆"}
+            </button>
+            <button
+              className="btn-ghost"
+              title={t("entryCard.moveToFolder")}
+              disabled={isReadOnlyDemo}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMove(true);
+              }}
+            >
+              📁
+            </button>
+            <button
+              className="btn-ghost"
+              title={t("common.duplicate")}
+              disabled={isReadOnlyDemo}
+              onClick={(e) => {
+                e.stopPropagation();
+                duplicateEntry(entry.id, undefined, t);
+              }}
+            >
+              ⧉
+            </button>
+            <button className="btn-ghost" title={t("entryCard.deleteConfirm.title")} disabled={isReadOnlyDemo} onClick={handleDelete}>
+              🗑
+            </button>
           </>
         )}
       </div>

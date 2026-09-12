@@ -595,16 +595,15 @@ export default function EntryPage({ entryIdOverride, worldIdOverride, embedded =
               ⇲
             </button>
           )}
-          {!isReadOnlyDemo && (
-            <button
-              className="btn-ghost"
-              onClick={handleToggleStar}
-              title={active.starred ? t("entryPage.unstarWholeCard") : t("entryPage.starWholeCard")}
-              style={{ color: active.starred ? "var(--accent)" : "var(--text-faint)", fontSize: 18 }}
-            >
-              {active.starred ? "★" : "☆"}
-            </button>
-          )}
+          <button
+            className="btn-ghost"
+            disabled={isReadOnlyDemo}
+            onClick={handleToggleStar}
+            title={active.starred ? t("entryPage.unstarWholeCard") : t("entryPage.starWholeCard")}
+            style={{ color: active.starred ? "var(--accent)" : "var(--text-faint)", fontSize: 18 }}
+          >
+            {active.starred ? "★" : "☆"}
+          </button>
           {editing ? (
             <>
               <ColorInput label={t("entryPage.titleColorLabel")} value={draft?.titleColor} onChange={(c) => updateDraft({ titleColor: c || undefined })} allowClear worldId={worldId} />
@@ -616,22 +615,20 @@ export default function EntryPage({ entryIdOverride, worldIdOverride, embedded =
               </button>
             </>
           ) : (
-            !isReadOnlyDemo && (
-              <>
-                <button className="btn" onClick={() => setShowExport(true)}>
-                  {t("entryPage.exportManuscript")}
-                </button>
-                <button className="btn" onClick={() => setShowHistory(true)}>
-                  {t("common.versionHistory")}
-                </button>
-                <button className="btn btn-primary" onClick={startEdit}>
-                  {t("common.edit")}
-                </button>
-                <button className="btn btn-danger" onClick={handleDelete}>
-                  {t("entryCard.deleteConfirm.title")}
-                </button>
-              </>
-            )
+            <>
+              <button className="btn" disabled={isReadOnlyDemo} onClick={() => setShowExport(true)}>
+                {t("entryPage.exportManuscript")}
+              </button>
+              <button className="btn" disabled={isReadOnlyDemo} onClick={() => setShowHistory(true)}>
+                {t("common.versionHistory")}
+              </button>
+              <button className="btn btn-primary" disabled={isReadOnlyDemo} onClick={startEdit}>
+                {t("common.edit")}
+              </button>
+              <button className="btn btn-danger" disabled={isReadOnlyDemo} onClick={handleDelete}>
+                {t("entryCard.deleteConfirm.title")}
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -734,7 +731,7 @@ export default function EntryPage({ entryIdOverride, worldIdOverride, embedded =
         onChangeExtraSlotValue={changeExtraSlotValue}
         onChangeExtraSlotType={changeExtraSlotType}
         onChangeExtraSlotChartConfig={changeExtraSlotChartConfig}
-        onToggleStar={isReadOnlyDemo ? undefined : handleToggleFieldStar}
+        onToggleStar={handleToggleFieldStar}
         onRemoveField={removeField}
         onDuplicateField={duplicateField}
         onRelabelField={relabelField}

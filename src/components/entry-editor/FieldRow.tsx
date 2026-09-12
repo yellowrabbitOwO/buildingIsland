@@ -5,6 +5,7 @@ import ExtraSlotsRow from "./ExtraSlotsRow";
 import FieldActionsMenu from "./FieldActionsMenu";
 import FieldHint from "../common/FieldHint";
 import { useLanguage } from "../../i18n";
+import { isReadOnlyDemo } from "../../demoMode";
 
 interface FieldRowProps {
   field: FieldDef;
@@ -57,6 +58,7 @@ export default function FieldRow({
         {onToggleStar && (
           <button
             className="btn-ghost"
+            disabled={isReadOnlyDemo}
             style={{ color: starred ? "var(--accent)" : "var(--text-faint)", flexShrink: 0 }}
             onClick={onToggleStar}
             title={t("fieldRow.starFieldTitle")}
