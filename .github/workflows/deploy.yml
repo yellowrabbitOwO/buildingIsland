@@ -1,0 +1,48 @@
+name: Deploy public demo to GitHub Pages
+
+# 每次推到 main 就自動重建、重新部署唯讀展示版（見 src/demoMode.ts）到 GitHub Pages。
+# 一次性設定：repo 的 Settings > Pages > Build and deployment > Source 要選「GitHub Actions」
+# （不是「Deploy from a branch」），這個 workflow 才會真的生效。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      # VITE_READONLY_DEMO=true 開啟 src/demoMode.ts 的唯讀展示模式；BASE_PATH 對應
+      # vite.config.ts 的 base 設定，因為 GitHub Pages 專案頁面跑在 /buildingIsland/ 子路徑下
+      - run: npm run build
+        env:
+          VITE_READONLY_DEMO: "true"
+          BASE_PATH: /buildingIsland/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
