@@ -378,16 +378,25 @@ export async function ensureSampleWorld(localUserId: string): Promise<void> {
   const categories = await ensureBuiltInCategories(worldId);
   const characterCat = categories.find((c) => c.builtInKey === "character")!;
   const locationCat = categories.find((c) => c.builtInKey === "location")!;
+  const eventCat = categories.find((c) => c.builtInKey === "event")!;
   const orgCat = categories.find((c) => c.builtInKey === "organization")!;
+  const itemCat = categories.find((c) => c.builtInKey === "item")!;
+  const noteCat = categories.find((c) => c.builtInKey === "note")!;
 
   const templates = await db.templates.filter((t) => t.isBuiltIn).toArray();
   const charTpl = templates.find((t) => t.builtInCategoryKey === "character")!;
   const locTpl = templates.find((t) => t.builtInCategoryKey === "location")!;
+  const eventTpl = templates.find((t) => t.builtInCategoryKey === "event")!;
   const orgTpl = templates.find((t) => t.builtInCategoryKey === "organization")!;
+  const itemTpl = templates.find((t) => t.builtInCategoryKey === "item")!;
+  const noteTpl = templates.find((t) => t.builtInCategoryKey === "note")!;
 
   const charFields = await resolveTemplateFields(charTpl, worldId);
   const locFields = await resolveTemplateFields(locTpl, worldId);
+  const eventFields = await resolveTemplateFields(eventTpl, worldId);
   const orgFields = await resolveTemplateFields(orgTpl, worldId);
+  const itemFields = await resolveTemplateFields(itemTpl, worldId);
+  const noteFields = await resolveTemplateFields(noteTpl, worldId);
 
   const findField = (fields: FieldDef[], key: string) => fields.find((f) => f.key === key)!.id;
 
@@ -446,9 +455,263 @@ export async function ensureSampleWorld(localUserId: string): Promise<void> {
     updatedAt: nowISO(),
   };
 
-  await db.entries.bulkAdd([orgEntry, locationEntry, characterEntry]);
+  // 每個內建分類再多補 2 筆範例，讓分類列表跟搜尋不會只有一兩筆孤零零的內容——沿用同一個
+  // 織光城邦的世界觀，順便示範 entryLink（組織成員／事件地點與人物／人際關係群組）跨條目串連
+  const kadenEntry: Entry = {
+    id: newId(),
+    worldId,
+    categoryId: characterCat.id,
+    name: "卡登",
+    summary: "織光議會的資深議員，主導對外交涉多年。",
+    starred: false,
+    starredFieldIds: [],
+    templateId: charTpl.id,
+    fields: charFields,
+    values: {
+      [findField(charFields, "gender")]: { current: "男" },
+      [findField(charFields, "occupation")]: { current: "議員 / 前織錦工坊主" },
+      [findField(charFields, "organization")]: { current: [orgEntry.id] },
+      [findField(charFields, "personality")]: { current: "圓融老練，習慣在議會裡扮演緩和各方意見的角色。" },
+    },
+    createdAt: nowISO(),
+    updatedAt: nowISO(),
+  };
+
+  const milaEntry: Entry = {
+    id: newId(),
+    worldId,
+    categoryId: characterCat.id,
+    name: "米菈",
+    summary: "城裡手藝出眾的年輕織錦師，艾莉雅的兒時好友。",
+    starred: false,
+    starredFieldIds: [],
+    templateId: charTpl.id,
+    fields: charFields,
+    values: {
+      [findField(charFields, "gender")]: { current: "女" },
+      [findField(charFields, "occupation")]: { current: "織錦師" },
+      [findField(charFields, "personality")]: { current: "直率、好奇心重，對新的織錦技法總是躍躍欲試。" },
+      [findField(charFields, "relationTarget")]: { current: characterEntry.id },
+      [findField(charFields, "relationType")]: { current: "兒時好友" },
+    },
+    createdAt: nowISO(),
+    updatedAt: nowISO(),
+  };
+
+  const marketLocationEntry: Entry = {
+    id: newId(),
+    worldId,
+    categoryId: locationCat.id,
+    name: "織光市集",
+    summary: "城裡最熱鬧的商圈，織錦工藝品交易的中心。",
+    starred: false,
+    starredFieldIds: [],
+    templateId: locTpl.id,
+    fields: locFields,
+    values: {
+      [findField(locFields, "environment")]: { current: "白日攤販林立、人聲鼎沸，夜裡攤棚收起後只剩織錦地磚微微發光。" },
+      [findField(locFields, "coordinates")]: { current: "織光城東區" },
+    },
+    createdAt: nowISO(),
+    updatedAt: nowISO(),
+  };
+
+  const coastLocationEntry: Entry = {
+    id: newId(),
+    worldId,
+    categoryId: locationCat.id,
+    name: "沉波海岸",
+    summary: "城邦南方的海岸線，據說是織錦工藝最初起源的地方。",
+    starred: false,
+    starredFieldIds: [],
+    templateId: locTpl.id,
+    fields: locFields,
+    values: {
+      [findField(locFields, "environment")]: { current: "終年多霧，潮間帶的礦物在退潮後會微微發光，相傳是織錦材料最早的來源。" },
+    },
+    createdAt: nowISO(),
+    updatedAt: nowISO(),
+  };
+
+  const anniversaryEventEntry: Entry = {
+    id: newId(),
+    worldId,
+    categoryId: eventCat.id,
+    name: "建城週年慶",
+    summary: "每年固定舉辦的城邦慶典，紀念織光城的建立。",
+    starred: false,
+    starredFieldIds: [],
+    templateId: eventTpl.id,
+    fields: eventFields,
+    values: {
+      [findField(eventFields, "time")]: { current: { mode: "single", year: 120, monthIndex: 8, day: 1 } },
+      [findField(eventFields, "eventType")]: { current: "節慶" },
+      [findField(eventFields, "location")]: { current: locationEntry.id },
+      [findField(eventFields, "description")]: { current: "全城張燈結彩，議會成員會在市集發表週年演說，是城裡最熱鬧的一天。" },
+      [findField(eventFields, "people")]: { current: [characterEntry.id, kadenEntry.id] },
+    },
+    createdAt: nowISO(),
+    updatedAt: nowISO(),
+  };
+
+  const anomalyEventEntry: Entry = {
+    id: newId(),
+    worldId,
+    categoryId: eventCat.id,
+    name: "織錦異變",
+    summary: "多年前發生在沉波海岸的異常事件，至今原因未明。",
+    starred: false,
+    starredFieldIds: [],
+    templateId: eventTpl.id,
+    fields: eventFields,
+    values: {
+      [findField(eventFields, "time")]: { current: { mode: "single", year: 115, monthIndex: 2, day: 14 } },
+      [findField(eventFields, "eventType")]: { current: "異常事件" },
+      [findField(eventFields, "location")]: { current: coastLocationEntry.id },
+      [findField(eventFields, "description")]: { current: "海岸潮間帶的發光礦物一度全數黯淡，數日後又恢復如常，議會至今未能解釋原因。" },
+      [findField(eventFields, "people")]: { current: [milaEntry.id] },
+    },
+    createdAt: nowISO(),
+    updatedAt: nowISO(),
+  };
+
+  const guildOrgEntry: Entry = {
+    id: newId(),
+    worldId,
+    categoryId: orgCat.id,
+    name: "織光工坊聯盟",
+    summary: "城內織錦工匠自發組成的同業公會。",
+    starred: false,
+    starredFieldIds: [],
+    templateId: orgTpl.id,
+    fields: orgFields,
+    values: {
+      [findField(orgFields, "nature")]: { current: "同業公會" },
+      [findField(orgFields, "purpose")]: { current: "統一織錦工藝的品質標準，並對外爭取工匠權益" },
+      [findField(orgFields, "members")]: { current: [milaEntry.id] },
+    },
+    createdAt: nowISO(),
+    updatedAt: nowISO(),
+  };
+
+  const watchOrgEntry: Entry = {
+    id: newId(),
+    worldId,
+    categoryId: orgCat.id,
+    name: "邊境巡守隊",
+    summary: "負責城邦邊界巡邏與治安的武裝隊伍。",
+    starred: false,
+    starredFieldIds: [],
+    templateId: orgTpl.id,
+    fields: orgFields,
+    values: {
+      [findField(orgFields, "nature")]: { current: "武裝治安組織" },
+      [findField(orgFields, "purpose")]: { current: "巡守城邦邊界，防範外敵與盜匪" },
+    },
+    createdAt: nowISO(),
+    updatedAt: nowISO(),
+  };
+
+  const crystalItemEntry: Entry = {
+    id: newId(),
+    worldId,
+    categoryId: itemCat.id,
+    name: "織光晶",
+    summary: "城市建材裡會發光的核心礦物，織光城之名的由來。",
+    starred: false,
+    starredFieldIds: [],
+    templateId: itemTpl.id,
+    fields: itemFields,
+    values: {
+      [findField(itemFields, "itemType")]: { current: "礦物材料" },
+      [findField(itemFields, "appearance")]: { current: "淡金色半透明結晶，夜間會自然發出柔和的光。" },
+      [findField(itemFields, "description")]: { current: "織入建材與布料後能長期發光，是織光城建築與織錦工藝的共同基礎材料。" },
+    },
+    createdAt: nowISO(),
+    updatedAt: nowISO(),
+  };
+
+  const scepterItemEntry: Entry = {
+    id: newId(),
+    worldId,
+    categoryId: itemCat.id,
+    name: "議會權杖",
+    summary: "織光議會象徵權威的儀式用權杖。",
+    starred: false,
+    starredFieldIds: [],
+    templateId: itemTpl.id,
+    fields: itemFields,
+    values: {
+      [findField(itemFields, "itemType")]: { current: "儀式器物" },
+      [findField(itemFields, "appearance")]: { current: "杖頭鑲有一顆拳頭大的織光晶，杖身纏繞金線織錦。" },
+      [findField(itemFields, "description")]: { current: "只在議會正式會議與週年慶典上使用，平時收於議會廳。" },
+    },
+    createdAt: nowISO(),
+    updatedAt: nowISO(),
+  };
+
+  const calendarNoteEntry: Entry = {
+    id: newId(),
+    worldId,
+    categoryId: noteCat.id,
+    name: "城邦曆法備忘",
+    summary: "關於織光城邦紀年方式的雜記。",
+    starred: false,
+    starredFieldIds: [],
+    templateId: noteTpl.id,
+    fields: noteFields,
+    values: {
+      [findField(noteFields, "noteType")]: { current: "世界觀設定" },
+      [findField(noteFields, "content")]: { current: "城邦紀年以建城之日為元年，目前故事線大約落在建城後第 120 年前後。" },
+    },
+    createdAt: nowISO(),
+    updatedAt: nowISO(),
+  };
+
+  const craftNoteEntry: Entry = {
+    id: newId(),
+    worldId,
+    categoryId: noteCat.id,
+    name: "織錦工藝技法",
+    summary: "整理織光城工匠常用的幾種織錦技法。",
+    starred: false,
+    starredFieldIds: [],
+    templateId: noteTpl.id,
+    fields: noteFields,
+    values: {
+      [findField(noteFields, "noteType")]: { current: "工藝設定" },
+      [findField(noteFields, "content")]: { current: "常見技法有「疊光織法」（讓布料呈現漸層光暈）與「錨線法」（把織光晶固定進建材縫隙），後者是織光城建築的關鍵技術。" },
+    },
+    createdAt: nowISO(),
+    updatedAt: nowISO(),
+  };
+
+  await db.entries.bulkAdd([
+    orgEntry,
+    locationEntry,
+    characterEntry,
+    kadenEntry,
+    milaEntry,
+    marketLocationEntry,
+    coastLocationEntry,
+    anniversaryEventEntry,
+    anomalyEventEntry,
+    guildOrgEntry,
+    watchOrgEntry,
+    crystalItemEntry,
+    scepterItemEntry,
+    calendarNoteEntry,
+    craftNoteEntry,
+  ]);
 
   await syncEntryLinkRelations(characterEntry.id, findField(charFields, "organization"), [orgEntry.id]);
+  await syncEntryLinkRelations(kadenEntry.id, findField(charFields, "organization"), [orgEntry.id]);
+  await syncEntryLinkRelations(milaEntry.id, findField(charFields, "relationTarget"), [characterEntry.id]);
+  await syncEntryLinkRelations(anniversaryEventEntry.id, findField(eventFields, "location"), [locationEntry.id]);
+  await syncEntryLinkRelations(anniversaryEventEntry.id, findField(eventFields, "people"), [characterEntry.id, kadenEntry.id]);
+  await syncEntryLinkRelations(anomalyEventEntry.id, findField(eventFields, "location"), [coastLocationEntry.id]);
+  await syncEntryLinkRelations(anomalyEventEntry.id, findField(eventFields, "people"), [milaEntry.id]);
+  await syncEntryLinkRelations(guildOrgEntry.id, findField(orgFields, "members"), [milaEntry.id]);
 }
 
 /** 本地使用者系統上線前建立的世界都沒有 localUserId；開機時跑一次，把這些「孤兒」世界
