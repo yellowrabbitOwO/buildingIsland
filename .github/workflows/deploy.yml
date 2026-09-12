@@ -1,8 +1,13 @@
 name: Deploy public demo to GitHub Pages
 
-# 每次推到 main 就自動重建、重新部署唯讀展示版（見 src/demoMode.ts）到 GitHub Pages。
-# 一次性設定：repo 的 Settings > Pages > Build and deployment > Source 要選「GitHub Actions」
-# （不是「Deploy from a branch」），這個 workflow 才會真的生效。
+# 每次推到 main 就自動重建、重新部署到 GitHub Pages。一次性設定：repo 的 Settings > Pages >
+# Build and deployment > Source 要選「GitHub Actions」（不是「Deploy from a branch」），
+# 這個 workflow 才會真的生效。
+#
+# 目前是一般模式（沒設 VITE_READONLY_DEMO）：每個訪客都能自由建立/編輯/刪除世界跟條目——
+# 這些操作全部只寫進訪客自己瀏覽器的 IndexedDB（見 App 本身沒有後端這件事），不會互相影響，
+# 也不會回寫到這個 repo。要改回唯讀展示版的話，在下面 build 步驟的 env 加回
+# VITE_READONLY_DEMO: "true" 即可（見 src/demoMode.ts）。
 on:
   push:
     branches: [main]
@@ -27,11 +32,10 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      # VITE_READONLY_DEMO=true 開啟 src/demoMode.ts 的唯讀展示模式；BASE_PATH 對應
-      # vite.config.ts 的 base 設定，因為 GitHub Pages 專案頁面跑在 /buildingIsland/ 子路徑下
+      # BASE_PATH 對應 vite.config.ts 的 base 設定，因為 GitHub Pages 專案頁面跑在
+      # /buildingIsland/ 子路徑下；VITE_READONLY_DEMO 沒設，所以是一般（可編輯）模式
       - run: npm run build
         env:
-          VITE_READONLY_DEMO: "true"
           BASE_PATH: /buildingIsland/
       - uses: actions/upload-pages-artifact@v3
         with:
